@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuzlocke Tracker Multijuego</title>
+  <meta name="description" content="Tracker profesional y multijuego para tus partidas Nuzlocke de Pokémon. Verde Hoja, HeartGold, Esmeralda, Platino, Blanco 2, Ultrasol, Espada y más.">
+  <link rel="icon" href="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" type="image/png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Estilos Personalizados -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+  <!-- HEADER SUPERIOR -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-rose-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/20">
+          <i class="fas fa-compact-disc"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold text-white tracking-wide">Nuzlocke Tracker</h1>
+            <span class="text-[10px] font-bold uppercase bg-indigo-900/80 text-indigo-300 border border-indigo-700/60 px-2 py-0.5 rounded-full">Multijuego</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+            <span id="header-run-name" class="font-bold text-slate-200">Cargando...</span>
+            <span>•</span>
+            <span id="header-game-name" class="text-slate-400">Juego</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div id="header-stats" class="flex items-center gap-4 text-xs font-semibold bg-slate-950/60 px-4 py-2 rounded-xl border border-slate-800">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- Barra de Navegación por Pestañas -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800/80">
+      <nav class="flex space-x-1 overflow-x-auto py-2 scrollbar-none text-xs font-bold" aria-label="Tabs">
+        <button type="button" data-nav-tab="encounters" class="px-3.5 py-2 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-map-marked-alt"></i> Encuentros
+        </button>
+        <button type="button" data-nav-tab="events" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-gift"></i> Eventos y Regalos
+        </button>
+        <button type="button" data-nav-tab="milestones" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-medal"></i> Medallas e Hitos
+        </button>
+        <button type="button" data-nav-tab="team" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-shield-alt"></i> Equipo y Caja
+        </button>
+        <button type="button" data-nav-tab="hof" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-trophy text-amber-400"></i> Salón de la Fama
+        </button>
+        <button type="button" data-nav-tab="runs" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-layer-group"></i> Mis Partidas
+        </button>
+        <button type="button" data-nav-tab="rules" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i class="fas fa-cog"></i> Reglas y Ajustes
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- 1. PESTAÑA: ENCUENTROS POR RUTA/ZONA -->
+    <section id="pane-encounters" class="tab-pane">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+        <div class="relative flex-1 w-full sm:max-w-md">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="encounter-search" placeholder="Buscar por ruta o Pokémon..."
+            class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <label class="text-xs text-slate-400 font-semibold whitespace-nowrap">Filtrar estado:</label>
+          <select id="encounter-status-filter" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Todas las zonas</option>
+            <option value="PENDING">Pendientes</option>
+            <option value="TEAM">En Equipo</option>
+            <option value="BOX">En Caja</option>
+            <option value="CAPTURED">Capturados</option>
+            <option value="DEAD">Muertos (💀)</option>
+            <option value="LOST">Perdidos / Huyeron</option>
+            <option value="FAILED">Captura Fallida</option>
+            <option value="DUPE_REROLL">Dupe / Re-roll</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lista de zonas -->
+      <div id="encounters-list" class="space-y-3">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 2. PESTAÑA: POKÉMON DE EVENTO Y REGALOS -->
+    <section id="pane-events" class="tab-pane hidden">
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fas fa-gift text-indigo-400"></i> Pokémon de Evento, Regalos y Especiales
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Starters, regalos de NPC, fósiles, intercambios in-game, huevos y encuentros estáticos/legendarios.</p>
+      </div>
+      <div id="events-list">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 3. PESTAÑA: MEDALLAS E HITOS -->
+    <section id="pane-milestones" class="tab-pane hidden">
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fas fa-medal text-amber-400"></i> Medallas, Pruebas e Hitos del Juego
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Sigue el nivel máximo permitido (Level Cap) de cada líder o Pokémon dominante antes de cada enfrentamiento.</p>
+      </div>
+      <div id="milestones-container">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 4. PESTAÑA: EQUIPO Y CAJA -->
+    <section id="pane-team" class="tab-pane hidden">
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fas fa-paw text-emerald-400"></i> Tu Equipo Actual (Máximo 6)
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Gestiona los integrantes activos de tu escuadrón, rota miembros a la caja o registra bajas con un clic.</p>
+      </div>
+
+      <!-- Cuadrícula de equipo (6 slots) -->
+      <div id="team-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Caja -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
+          <h3 class="font-bold text-slate-200 text-sm mb-3 flex items-center gap-2">
+            <i class="fas fa-box text-blue-400"></i> Pokémon en Caja / Reserva
+          </h3>
+          <div id="box-list" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+            <!-- Renderizado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Cementerio -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
+          <h3 class="font-bold text-red-300 text-sm mb-3 flex items-center gap-2">
+            <i class="fas fa-skull text-red-400"></i> Cementerio (Bajas de la Run)
+          </h3>
+          <div id="graveyard-list" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+            <!-- Renderizado dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PESTAÑA: SALÓN DE LA FAMA -->
+    <section id="pane-hof" class="tab-pane hidden">
+      <div id="hof-container">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- 6. PESTAÑA: MIS PARTIDAS (RUNS) -->
+    <section id="pane-runs" class="tab-pane hidden">
+      <div id="runs-list">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <!-- Sincronización y Backup -->
+      <div class="mt-8 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h4 class="font-bold text-slate-200 text-sm">Copia de Seguridad y Archivos Externos</h4>
+          <p class="text-xs text-slate-400 mt-0.5">Exporta todas tus partidas en JSON o añade nuevos juegos creados por la comunidad.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button type="button" id="btn-export-all-backup" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fas fa-download text-indigo-400"></i> Descargar Backup Completo
+          </button>
+          <label class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-upload text-emerald-400"></i> Importar Archivo (Run o Juego JSON)
+            <input type="file" id="import-file-input" accept=".json" class="hidden">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. PESTAÑA: REGLAS Y AJUSTES -->
+    <section id="pane-rules" class="tab-pane hidden">
+      <div id="rules-settings-container">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: REGISTRAR / EDITAR ENCUENTRO -->
+  <div id="modal-encounter" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative animate-fade-in">
+      <button type="button" id="modal-encounter-close" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+
+      <h3 class="text-lg font-extrabold text-white mb-1 flex items-center gap-2">
+        <i class="fas fa-map-pin text-indigo-400"></i>
+        <span id="modal-enc-zone-title">Registrar Zona</span>
+      </h3>
+      <p class="text-xs text-slate-400 mb-4">Ingresa la información del Pokémon encontrado o capturado en esta ruta.</p>
+
+      <!-- Alertas dinámicas -->
+      <div id="enc-zone-warning" class="hidden mb-3 p-3 bg-amber-950/40 border border-amber-600/40 rounded-xl text-xs text-amber-300"></div>
+      <div id="enc-dupes-alert" class="hidden mb-3 p-3 bg-yellow-950/50 border border-yellow-500/50 rounded-xl text-xs text-yellow-200"></div>
+
+      <form id="form-encounter" class="space-y-4">
+        <!-- Especie con autocompletado y Preview -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Especie de Pokémon *</label>
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center p-1 shrink-0">
+              <img id="modal-sprite-preview" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png" class="w-12 h-12 object-contain" alt="Preview">
+            </div>
+            <div class="relative flex-1">
+              <input type="text" id="enc-pokemon-species" placeholder="Escribe para buscar (ej: Pikachu, Lucario...)"
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition" required autocomplete="off">
+              <div id="species-autocomplete-dropdown" class="autocomplete-dropdown hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mote y Nivel -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Mote / Apodo</label>
+            <input type="text" id="enc-nickname" placeholder="Ej: Chispitas" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Nivel</label>
+            <input type="number" id="enc-level" placeholder="Ej: 5" min="1" max="100" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Naturaleza y Habilidad -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Naturaleza (Opcional)</label>
+            <select id="enc-nature" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+              <option value="">Selecciona naturaleza...</option>
+              <option value="Firme">Firme (+Atk, -SpA)</option>
+              <option value="Alegre">Alegre (+Spe, -SpA)</option>
+              <option value="Modesta">Modesta (+SpA, -Atk)</option>
+              <option value="Miedosa">Miedosa (+Spe, -Atk)</option>
+              <option value="Agitada">Agitada (+Def, -SpA)</option>
+              <option value="Cauta">Cauta (+SpD, -SpA)</option>
+              <option value="Osada">Osada (+Def, -Atk)</option>
+              <option value="Serena">Serena (+SpD, -Atk)</option>
+              <option value="Audaz">Audaz (+Atk, -Spe)</option>
+              <option value="Mansa">Mansa (+SpA, -Spe)</option>
+              <option value="Plácida">Plácida (+Def, -Spe)</option>
+              <option value="Grosera">Grosera (+SpD, -Spe)</option>
+              <option value="Ingenua">Ingenua (+Spe, -SpD)</option>
+              <option value="Activa">Activa (+Spe, -Def)</option>
+              <option value="Pícara">Pícara (+Atk, -SpD)</option>
+              <option value="Huraña">Huraña (+Atk, -Def)</option>
+              <option value="Alocada">Alocada (+SpA, -SpD)</option>
+              <option value="Afable">Afable (+SpA, -Def)</option>
+              <option value="Fuerte">Fuerte (Neutra)</option>
+              <option value="Dócil">Dócil (Neutra)</option>
+              <option value="Tímida">Tímida (Neutra)</option>
+              <option value="Rara">Rara (Neutra)</option>
+              <option value="Seria">Seria (Neutra)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Habilidad (Opcional)</label>
+            <input type="text" id="enc-ability" placeholder="Ej: Espesura" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Objeto y Shiny -->
+        <div class="grid grid-cols-2 gap-3 items-center">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Objeto Equipado</label>
+            <input type="text" id="enc-item" placeholder="Ej: Restos, Baya Zidra" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div class="pt-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="enc-shiny" class="w-4 h-4 text-amber-500 bg-slate-950 border-slate-700 rounded focus:ring-0">
+              <span class="text-xs font-bold text-amber-400">✨ ¿Es Shiny / Variocolor?</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Estado del Encuentro -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Estado del Pokémon *</label>
+          <select id="enc-status" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-semibold" required>
+            <option value="TEAM">VIVO EN EQUIPO (Team)</option>
+            <option value="BOX">EN CAJA (Box)</option>
+            <option value="CAPTURED">CAPTURADO</option>
+            <option value="DEAD">MUERTO (💀)</option>
+            <option value="LOST">PERDIDO (Huyó / Liberado)</option>
+            <option value="FAILED">FALLÓ LA CAPTURA</option>
+            <option value="DUPE_REROLL">DUPLICADO - RE-ROLL</option>
+            <option value="NONE">SIN ENCUENTRO</option>
+          </select>
+        </div>
+
+        <!-- Campos condicionales para MUERTO -->
+        <div id="field-death-details" class="hidden p-3 bg-red-950/20 border border-red-900/40 rounded-xl space-y-2">
+          <label class="block text-xs font-bold text-red-300">Causa de Muerte / Quién lo mató *</label>
+          <input type="text" id="enc-death-cause" placeholder="Ej: Crítico de Destructor de Miltank de Blanca en Gimnasio 3"
+            class="w-full bg-slate-950 border border-red-900/60 rounded-lg p-2 text-xs text-red-200">
+        </div>
+
+        <!-- Campos condicionales para PERDIDO -->
+        <div id="field-lost-details" class="hidden p-3 bg-amber-950/20 border border-amber-900/40 rounded-xl space-y-2">
+          <label class="block text-xs font-bold text-amber-300">Motivo de pérdida</label>
+          <input type="text" id="enc-lost-reason" placeholder="Ej: Se usó Teletransporte / Intercambio no planeado"
+            class="w-full bg-slate-950 border border-amber-900/60 rounded-lg p-2 text-xs text-amber-200">
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          <button type="button" onclick="document.getElementById('modal-encounter').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
+            Guardar Encuentro
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR NUEVA RUN -->
+  <div id="modal-new-run" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-fade-in">
+      <button type="button" id="modal-new-run-close" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+
+      <h3 class="text-lg font-extrabold text-white mb-1 flex items-center gap-2">
+        <i class="fas fa-play text-emerald-400"></i> Nueva Partida Nuzlocke
+      </h3>
+      <p class="text-xs text-slate-400 mb-4">Elige el juego y personaliza las reglas iniciales de tu desafío.</p>
+
+      <form id="form-new-run" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Nombre de la Partida *</label>
+          <input type="text" id="new-run-name" placeholder="Ej: Esmeralda - Run 1, Platino Hardcore..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Juego Pokémon *</label>
+          <select id="new-run-game" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500" required>
+            <!-- Llenado dinámicamente con los 7 juegos -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Preset de Reglas</label>
+          <select id="new-run-preset" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+            <option value="standard">Nuzlocke Estándar (1 por ruta, Dupes Clause, Shiny Clause)</option>
+            <option value="hardcore">Hardcore Nuzlocke (Level Cap estricto, sin curaciones en combate, modo Set)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/30">
+            Crear y Comenzar Desafío
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR / EDITAR SALÓN DE LA FAMA -->
+  <div id="modal-hof" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative animate-fade-in">
+      <button type="button" id="modal-hof-close" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-xl font-extrabold text-amber-400 flex items-center gap-2">
+            <i class="fas fa-trophy"></i> Registrar Salón de la Fama
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Ingresa los datos de los 6 campeones y las estadísticas de victoria.</p>
+        </div>
+        <button type="button" id="btn-autofill-hof-team" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-700/60 rounded-lg text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto">
+          <i class="fas fa-magic"></i> Auto-rellenar desde Equipo Actual
+        </button>
+      </div>
+
+      <form id="form-hof" class="space-y-6">
+        <!-- Estadísticas globales de victoria -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Fecha de Victoria</label>
+            <input type="date" id="hof-date" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Tiempo de Juego (Ej: 24h 15m)</label>
+            <input type="text" id="hof-playtime" placeholder="Ej: 32:45" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Intentos / Wipes previas</label>
+            <input type="number" id="hof-wipes" min="0" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+          </div>
+        </div>
+
+        <!-- 6 Slots de Pokémon -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Generamos 6 formularios de slots -->
+          <script>
+            // Inyectar los 6 slots
+            for (let i = 0; i < 6; i++) {
+              document.write(`
+                <div class="p-3.5 bg-slate-950/50 border border-slate-800 rounded-xl space-y-2.5">
+                  <span class="text-xs font-bold text-amber-400">Campeón #${i + 1}</span>
+                  <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="hof-pkmn-${i}" placeholder="Especie (ej: Charizard)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="hof-nick-${i}" placeholder="Mote / Apodo" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                  </div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <input type="number" id="hof-lvl-${i}" placeholder="Nivel" min="1" max="100" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="hof-ability-${i}" placeholder="Habilidad" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="hof-item-${i}" placeholder="Objeto" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="hof-m-${i}-0" placeholder="Movimiento 1" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200">
+                    <input type="text" id="hof-m-${i}-1" placeholder="Movimiento 2" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200">
+                    <input type="text" id="hof-m-${i}-2" placeholder="Movimiento 3" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200">
+                    <input type="text" id="hof-m-${i}-3" placeholder="Movimiento 4" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200">
+                  </div>
+                  <label class="flex items-center gap-2 cursor-pointer pt-1">
+                    <input type="checkbox" id="hof-shiny-${i}" class="w-3.5 h-3.5 text-amber-500 bg-slate-900 border-slate-700 rounded">
+                    <span class="text-[11px] text-amber-400 font-semibold">✨ Shiny</span>
+                  </label>
+                </div>
+              `);
+            }
+          </script>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          <button type="button" onclick="document.getElementById('modal-hof').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-extrabold transition shadow-lg shadow-amber-500/20">
+            Guardar Salón de la Fama
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPTS EN ORDEN DE ARQUITECTURA -->
+  <script src="data/registry.js"></script>
+  <script src="js/pokedex.js"></script>
+  <!-- 7 Juegos Oficiales Registrados -->
+  <script src="data/games/leafgreen.js"></script>
+  <script src="data/games/heartgold.js"></script>
+  <script src="data/games/emerald.js"></script>
+  <script src="data/games/platinum.js"></script>
+  <script src="data/games/black2.js"></script>
+  <script src="data/games/ultrasun.js"></script>
+  <script src="data/games/sword.js"></script>
+  <!-- Lógica y Exportador -->
+  <script src="js/storage.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
